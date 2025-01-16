@@ -7,8 +7,6 @@ import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
@@ -33,34 +31,31 @@ public class CreateEvidenceContext implements ContextMenuItemsProvider{
 
             JMenuItem createEvidenceItem = new JMenuItem("Create Evidence");
 
-            HttpRequestResponse requestResponse = event.messageEditorRequestResponse().isPresent() ? event.messageEditorRequestResponse().get().requestResponse() : event.selectedRequestResponses().get(0);
+            HttpRequestResponse requestResponse = event.messageEditorRequestResponse().isPresent() ? event.messageEditorRequestResponse().get().requestResponse() : event.selectedRequestResponses().getFirst();
 
-            createEvidenceItem.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                        JFileChooser fileChooser = new JFileChooser();
-                        fileChooser.setDialogTitle("Save As");
-                        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+            createEvidenceItem.addActionListener(e -> {
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setDialogTitle("Save As");
+                    fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
 
-                        int userSelection = fileChooser.showSaveDialog(null);
+                    int userSelection = fileChooser.showSaveDialog(null);
 
-                        if (userSelection == JFileChooser.APPROVE_OPTION) {
+                    if (userSelection == JFileChooser.APPROVE_OPTION) {
 
-                            File fileToSave = fileChooser.getSelectedFile();
+                        File fileToSave = fileChooser.getSelectedFile();
 
-                            try (FileWriter writer = new FileWriter(fileToSave)) {
-                                writer.write(requestResponse.request().toString() + "\n--------------------------------------------------\n" + requestResponse.response().toString());
-                                writer.close();
-                                api.logging().logToOutput(requestResponse.request().toString() + "\n--------------------------------------------------\n" + requestResponse.response().toString());
-                                api.logging().logToOutput("File saved at: " + fileToSave.getAbsolutePath());
+                        try (FileWriter writer = new FileWriter(fileToSave)) {
+                            writer.write(requestResponse.request().toString() + "\n--------------------------------------------------\n" + requestResponse.response().toString());
+                            writer.close();
+                            api.logging().logToOutput(requestResponse.request().toString() + "\n--------------------------------------------------\n" + requestResponse.response().toString());
+                            api.logging().logToOutput("File saved at: " + fileToSave.getAbsolutePath());
 
-                            } catch (IOException exception) {
-                                exception.printStackTrace();
-                            }
-                        } else {
-                            api.logging().logToOutput("Save command cancelled");
+                        } catch (IOException exception) {
+                            exception.printStackTrace();
                         }
-                }
+                    } else {
+                        api.logging().logToOutput("Save command cancelled");
+                    }
             });
 
             menuItemList.add(createEvidenceItem);
