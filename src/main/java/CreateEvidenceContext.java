@@ -7,6 +7,8 @@ import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -31,9 +33,22 @@ public class CreateEvidenceContext implements ContextMenuItemsProvider{
             List<Component> menuItemList = new ArrayList<>();
 
             JMenuItem createEvidenceItem = new JMenuItem("Create Evidence");
+            JMenuItem copyEvidenceToClipboard = new JMenuItem("Copy to clipboard");
             JMenuItem setEvidenceDir = getJMenuItem();
 
+
+
             HttpRequestResponse requestResponse = event.messageEditorRequestResponse().isPresent() ? event.messageEditorRequestResponse().get().requestResponse() : event.selectedRequestResponses().getFirst();
+
+            copyEvidenceToClipboard.addActionListener(e -> {
+                String httpEvidenceDataRequest = new String(requestResponse.request().toByteArray().getBytes(), StandardCharsets.UTF_8);
+                String httpEvidenceDataResponse = new String(requestResponse.response().toByteArray().getBytes(), StandardCharsets.UTF_8);
+
+                StringSelection selection = new StringSelection(httpEvidenceDataRequest + "\r\n\r\n--------------------------------------------------\r\n\r\n" + httpEvidenceDataResponse);
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(selection, selection);
+
+            });
 
             createEvidenceItem.addActionListener(e -> {
                     JFileChooser fileChooser = new JFileChooser();
@@ -70,6 +85,7 @@ public class CreateEvidenceContext implements ContextMenuItemsProvider{
             });
 
             menuItemList.add(createEvidenceItem);
+            menuItemList.add(copyEvidenceToClipboard);
             menuItemList.add(setEvidenceDir);
 
             return menuItemList;
