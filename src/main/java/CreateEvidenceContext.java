@@ -16,6 +16,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class CreateEvidenceContext implements ContextMenuItemsProvider{
 
     private final MontoyaApi api;
+    private static File currentEvidenceDirectory = null;
 
     public CreateEvidenceContext(MontoyaApi api)
     {
@@ -30,6 +31,7 @@ public class CreateEvidenceContext implements ContextMenuItemsProvider{
             List<Component> menuItemList = new ArrayList<>();
 
             JMenuItem createEvidenceItem = new JMenuItem("Create Evidence");
+            JMenuItem setEvidenceDir = getJMenuItem();
 
             HttpRequestResponse requestResponse = event.messageEditorRequestResponse().isPresent() ? event.messageEditorRequestResponse().get().requestResponse() : event.selectedRequestResponses().getFirst();
 
@@ -38,8 +40,10 @@ public class CreateEvidenceContext implements ContextMenuItemsProvider{
                     FileNameExtensionFilter filter = new FileNameExtensionFilter("Text files", "txt");
                     fileChooser.setFileFilter(filter);
                     fileChooser.setDialogTitle("Save As");
-                    fileChooser.setSelectedFile(new File("_NoSignature_200_Normal.txt"));
-                    fileChooser.setCurrentDirectory(new File(System.getProperty("user.documents") + ".txt"));
+                    fileChooser.setSelectedFile(new File("__200_Normal.txt"));
+                    fileChooser.setCurrentDirectory(currentEvidenceDirectory != null
+                            ? currentEvidenceDirectory
+                            : new File(System.getProperty("user.home") + "/Documents"));
 
                     int userSelection = fileChooser.showSaveDialog(null);
 
@@ -66,10 +70,34 @@ public class CreateEvidenceContext implements ContextMenuItemsProvider{
             });
 
             menuItemList.add(createEvidenceItem);
+            menuItemList.add(setEvidenceDir);
 
             return menuItemList;
         }
 
         return null;
     }
+
+    private static JMenuItem getJMenuItem() {
+        JMenuItem setEvidenceDir = new JMenuItem("Set Evidence Directory");
+
+        setEvidenceDir.addActionListener( e -> {
+            JFileChooser dirChooser = new JFileChooser();
+            dirChooser.setDialogTitle("Select Evidence Directory");
+            dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            dirChooser.setAcceptAllFileFilterUsed(false);
+
+            if (currentEvidenceDirectory != null) {
+                dirChooser.setCurrentDirectory(currentEvidenceDirectory);
+            }
+
+            int result = dirChooser.showDialog(null, "Set Directory");
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                currentEvidenceDirectory = dirChooser.getSelectedFile();
+            }
+        });
+        return setEvidenceDir;
+    }
+
 }
