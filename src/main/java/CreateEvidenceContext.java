@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,11 +67,11 @@ public class CreateEvidenceContext implements ContextMenuItemsProvider{
 
                         File fileToSave = fileChooser.getSelectedFile();
 
-                        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(fileToSave), StandardCharsets.UTF_8);
+                        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(fileToSave), Charset.forName("Shift_JIS"));
                              BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
 
-                            String httpEvidenceDataRequest = new String(requestResponse.request().toByteArray().getBytes(), StandardCharsets.UTF_8);
-                            String httpEvidenceDataResponse = new String(requestResponse.response().toByteArray().getBytes(), StandardCharsets.UTF_8);
+                            String httpEvidenceDataRequest = new String(requestResponse.request().toByteArray().getBytes(), Charset.forName("Shift_JIS"));
+                            String httpEvidenceDataResponse = new String(requestResponse.response().toByteArray().getBytes(), Charset.forName("Shift_JIS"));
 
                             bufferedWriter.write(httpEvidenceDataRequest + "\r\n\r\n--------------------------------------------------\r\n\r\n" + httpEvidenceDataResponse);
                             bufferedWriter.close();
